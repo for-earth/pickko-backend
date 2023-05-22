@@ -14,6 +14,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Optional;
+
 @Service
 public class KakaoOAuth2Service {
 
@@ -45,14 +47,17 @@ public class KakaoOAuth2Service {
         String responseBody = response.getBody();
 
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readTree(responseBody);
+        KakaoTokenDto kakaoToken = null;
 
-        System.out.println(jsonNode.toString());
+        try {
+            kakaoToken = objectMapper.readValue(responseBody, KakaoTokenDto.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
 
-        String accessToken = jsonNode.path("access_token").asText();
-        String refreshToken = jsonNode.path("refresh_token").asText();
+        System.out.println(kakaoToken.toString());
 
-        return new Token(accessToken, refreshToken);
+        return new Token(kakaoToken.access_token, kakaoToken.refresh_token);
     }
 
     public Token reissueToken(String token) throws JsonProcessingException {
@@ -80,15 +85,19 @@ public class KakaoOAuth2Service {
         String responseBody = response.getBody();
 
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readTree(responseBody);
+        KakaoTokenDto kakaoToken = null;
 
-        System.out.println(jsonNode.toString());
+        System.out.println(objectMapper.readTree(responseBody).toString());
 
-        String accessToken = jsonNode.path("access_token").asText();
-        JsonNode refreshTokenNode = jsonNode.path("refresh_token");
-        String refreshToken = refreshTokenNode.isMissingNode() ? token : refreshTokenNode.asText();
+        try {
+            kakaoToken = objectMapper.readValue(responseBody, KakaoTokenDto.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
 
-        return new Token(accessToken, refreshToken);
+        System.out.println(kakaoToken.toString());
+
+        return new Token(kakaoToken.access_token, Optional.ofNullable(kakaoToken.refresh_token).orElse(token));
     }
 
     public User getUserInfo(String accessToken) throws JsonProcessingException {
@@ -110,18 +119,16 @@ public class KakaoOAuth2Service {
         // responseBody에 있는 정보를 꺼냄
         String responseBody = response.getBody();
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readTree(responseBody);
+        KakaoProfileDto kakaoProfile = null;
 
-        System.out.println(jsonNode.toString());
+        try {
+            kakaoProfile = objectMapper.readValue(responseBody, KakaoProfileDto.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
 
-        Long id = jsonNode.path("id").asLong();
-        String nickname = jsonNode.path("properties")
-                .path("nickname").asText();
-        String profileImage = jsonNode.path("properties")
-                .path("profile_image").asText();
-        String thumbnailImage = jsonNode.path("properties")
-                .path("thumbnail_image").asText();
+        System.out.println(kakaoProfile.toString());
 
-        return new User(id, nickname, profileImage, thumbnailImage);
+        return new User(kakaoProfile.id, kakaoProfile.properties.nickname, kakaoProfile.properties.profile_image, kakaoProfile.properties.thumbnail_image);
     }
 }
