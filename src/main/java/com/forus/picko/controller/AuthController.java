@@ -15,7 +15,9 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 
 @Tag(name = "auth", description = "Auth API")
 @RestController
@@ -40,18 +42,26 @@ public class AuthController {
     })
     @PostMapping("/kakao/token")
     @ResponseBody
-    public Token kakaoToken(@RequestHeader String origin, @RequestBody KakaoLoginRequestDto request) throws Exception {
+    public ResponseEntity<Token> kakaoToken(@RequestHeader String origin, @RequestBody KakaoLoginRequestDto request) throws Exception {
 
         GrantType grantType = request.getGrantType();
         String code = request.getCode();
         String refreshToken = request.getRefreshToken();
 
         if (grantType == GrantType.authorization_code) {
-            return kakaoOAuth2Service.getToken(code, origin);
+            try {
+                return ResponseEntity.ok(kakaoOAuth2Service.getToken(code, origin));
+            } catch (HttpClientErrorException e) {
+                return new ResponseEntity(e.getMessage(), e.getStatusCode());
+            }
         }
 
         if (grantType == GrantType.refresh_token) {
-            return kakaoOAuth2Service.reissueToken(refreshToken);
+            try {
+                return ResponseEntity.ok(kakaoOAuth2Service.reissueToken(refreshToken));
+            } catch (HttpClientErrorException e) {
+                return new ResponseEntity(e.getMessage(), e.getStatusCode());
+            }
         }
 
         throw new Exception("올바르지 않은 grant_type 입니다.");

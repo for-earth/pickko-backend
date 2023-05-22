@@ -14,7 +14,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 
 @Tag(name = "user", description = "User API")
 @RestController
@@ -34,10 +36,14 @@ public class UserController {
     })
     @GetMapping("/profile")
     @ResponseBody
-    public User user(@RequestHeader String authorization) throws JsonProcessingException {
+    public ResponseEntity<User> user(@RequestHeader String authorization) throws JsonProcessingException, HttpClientErrorException {
         String[] split = authorization.split(" ");
         String accessToken = split[1];
 
-        return kakaoOAuth2Service.getUserInfo(accessToken);
+        try {
+            return ResponseEntity.ok(kakaoOAuth2Service.getUserInfo(accessToken));
+        } catch (HttpClientErrorException e) {
+            return new ResponseEntity(e.getMessage(), e.getStatusCode());
+        }
     }
 }
