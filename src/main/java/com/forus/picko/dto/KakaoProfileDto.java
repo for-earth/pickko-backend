@@ -1,7 +1,9 @@
-package com.forus.picko.service;
+package com.forus.picko.dto;
 
 import lombok.Data;
 import lombok.ToString;
+
+import java.util.Optional;
 
 @ToString
 @Data
@@ -31,7 +33,7 @@ public class KakaoProfileDto {
         public Boolean email_needs_agreement;
         public Boolean is_email_valid;
         public Boolean is_email_verified;
-        public String email;
+        public Optional<String> email = Optional.empty();
 
         @Data
         public class Profile {

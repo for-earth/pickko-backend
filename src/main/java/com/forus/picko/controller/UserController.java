@@ -1,13 +1,9 @@
 package com.forus.picko.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.forus.picko.domain.GrantType;
-import com.forus.picko.domain.Token;
-import com.forus.picko.domain.User;
+import com.forus.picko.dto.KakaoUserDto;
 import com.forus.picko.service.KakaoOAuth2Service;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -32,11 +28,11 @@ public class UserController {
 
     @Operation(summary = "profile", description = "유저 프로필")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = User.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = KakaoUserDto.class))),
     })
     @GetMapping("/profile")
     @ResponseBody
-    public ResponseEntity<User> user(@RequestHeader String authorization) throws JsonProcessingException, HttpClientErrorException {
+    public ResponseEntity<KakaoUserDto> user(@RequestHeader String authorization) throws JsonProcessingException, HttpClientErrorException {
         String[] split = authorization.split(" ");
         String accessToken = split[1];
 

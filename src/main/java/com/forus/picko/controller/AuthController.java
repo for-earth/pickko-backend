@@ -2,6 +2,7 @@ package com.forus.picko.controller;
 
 import com.forus.picko.domain.GrantType;
 import com.forus.picko.domain.Token;
+import com.forus.picko.dto.KakaoLoginRequestDto;
 import com.forus.picko.service.KakaoOAuth2Service;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -11,9 +12,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.Data;
-import lombok.Getter;
-import lombok.ToString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,7 +41,6 @@ public class AuthController {
     @PostMapping("/kakao/token")
     @ResponseBody
     public ResponseEntity<Token> kakaoToken(@RequestHeader String origin, @RequestBody KakaoLoginRequestDto request) throws Exception {
-
         GrantType grantType = request.getGrantType();
         String code = request.getCode();
         String refreshToken = request.getRefreshToken();
@@ -66,14 +63,5 @@ public class AuthController {
 
         throw new Exception("올바르지 않은 grant_type 입니다.");
     }
-}
-
-@ToString
-@Data
-class KakaoLoginRequestDto {
-
-    private String code;
-    private String refreshToken;
-    private GrantType grantType;
 }
 
